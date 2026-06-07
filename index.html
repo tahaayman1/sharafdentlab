@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sharaf Dent Lab | Premium Dental Restorations</title>
+  <script>
+    // Unregister all old service workers and clear cache to remove Next.js PWA leftovers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        if (registrations.length > 0) {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+          if ('caches' in window) {
+            caches.keys().then(function(keys) {
+              Promise.all(keys.map(key => caches.delete(key))).then(function() {
+                window.location.reload(true);
+              });
+            });
+          }
+        }
+      });
+    }
+  </script>
+  <meta name="description" content="High-quality dental restorations by master ceramists. Zirconia crowns, E.max veneers, implant prosthetics, and full-arch solutions.">
+  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0/dist/iife/sdk.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- ========== HEADER ========== -->
+  <header>
+    <div class="container header-container">
+      <a href="index.html" class="logo-link">
+        <img src="pic/sharaf_logo.png" alt="Sharaf Dent Lab" class="logo-img">
+        <span class="logo-text">Sharaf <span style="color: var(--primary)">Dent Lab</span></span>
+      </a>
+
+      <nav>
+        <ul class="nav-links" id="nav-menu">
+          <li><a href="#hero-sec" class="nav-link active">Home</a></li>
+          <li><a href="#about" class="nav-link">About Us</a></li>
+          <li><a href="#gallery" class="nav-link">Cases</a></li>
+          <li><a href="#services" class="nav-link">Services</a></li>
+          <li><a href="#contact" class="nav-link">Contact Us</a></li>
+        </ul>
+      </nav>
+
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <div class="theme-switch-wrapper">
+          <button class="theme-btn" data-theme-val="light" title="Light"><i data-lucide="sun" style="width:14px;height:14px;"></i></button>
+          <button class="theme-btn active" data-theme-val="dark" title="Dark"><i data-lucide="moon" style="width:14px;height:14px;"></i></button>
+        </div>
+        <button class="menu-toggle" id="menu-toggle-btn"><i data-lucide="menu"></i></button>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- ========== HERO ========== -->
+  <section class="hero-section" id="hero-sec">
+    <div class="hero-section-inner container">
+      <div class="hero-content">
+        <h1>High-Quality Dental Restorations!</h1>
+        <p class="hero-subtitle">Master ceramists and a team of top professionals.</p>
+        <p class="hero-desc">Empowering dental clinics with state-of-the-art restorative craftsmanship. From micron-perfect CAD/CAM zirconia structures to specialized complex implant full arches.</p>
+        <div class="hero-actions">
+          <a href="#contact" class="btn btn-primary">Request a Quote</a>
+        </div>
+      </div>
+      <div class="hero-image-wrapper">
+        <img src="pic/sharaf_pic.png" alt="Premium dental restoration" id="hero-img-el">
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========== ABOUT US ========== -->
+  <section class="about-section" id="about">
+    <div class="container about-grid">
+      <div class="about-image-wrapper">
+        <img src="pic/E-MAX.png" alt="Sharaf Dent Lab work" id="about-img-el">
+      </div>
+      <div class="about-content">
+        <span class="section-subtitle">About Us</span>
+        <h2>Over 10 Years of Excellence in Dental Restorations</h2>
+        <p>Sharaf Dent Lab has been at the forefront of dental prosthetics for over a decade, delivering exceptional quality to dental clinics across the region. Our state-of-the-art facility is equipped with the latest CAD/CAM milling technology, 3D printing systems, and precision tools.</p>
+        <p>Our team of master ceramists and dental technicians brings years of specialized experience in crafting zirconia crowns, E.max veneers, implant-supported prosthetics, and complex full-arch rehabilitations.</p>
+        <p>We are committed to building trusted partnerships with dentists, providing direct clinical support, custom shade matching, and rapid turnaround times.</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========== WHY CHOOSE US ========== -->
+  <section class="why-section">
+    <div class="container">
+      <div class="section-heading-wrapper">
+        <h2 class="section-title">Why Choose Sharaf Dent Lab?</h2>
+        <div class="section-divider"></div>
+      </div>
+      <div class="why-grid" id="why-choose-grid">
+        <div class="why-card">
+          <div class="why-icon"><i data-lucide="award"></i></div>
+          <h3>Unmatched Expertise</h3>
+          <p>Over a decade of experience crafting dental prosthetics with master ceramists trained in the latest techniques.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon"><i data-lucide="crosshair"></i></div>
+          <h3>Precision & Customization</h3>
+          <p>Five-axis CAD/CAM milling with tolerances under 10 microns, combined with hand-finished aesthetic customization.</p>
+        </div>
+        <div class="why-card">
+          <div class="why-icon"><i data-lucide="heart-handshake"></i></div>
+          <h3>Commitment to Excellence</h3>
+          <p>Triple quality validation, premium certified materials, and direct clinical support for perfect results.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========== CASE GALLERY — 3-image slider ========== -->
+  <section class="case-gallery-section" id="gallery">
+    <div class="container">
+      <div class="section-heading-wrapper">
+        <h2 class="section-title">Case Gallery</h2>
+        <div class="section-divider"></div>
+      </div>
+
+      <div class="gallery-slider-wrapper">
+        <button class="gallery-arrow gallery-prev-btn" id="gallery-prev-btn" aria-label="Previous">
+          <i data-lucide="chevron-left"></i>
+        </button>
+
+        <div class="gallery-viewport">
+          <div class="gallery-track" id="gallery-track">
+            <!-- Dynamically populated from Appwrite cases collection -->
+          </div>
+        </div>
+
+        <button class="gallery-arrow gallery-next-btn" id="gallery-next-btn" aria-label="Next">
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="gallery-dots" id="gallery-dots"></div>
+    </div>
+  </section>
+
+
+  <!-- ========== SERVICES — 4-column grid ========== -->
+  <section class="services-section" id="services">
+    <div class="container">
+      <div class="section-heading-wrapper">
+        <h2 class="section-title">Services</h2>
+        <div class="section-divider"></div>
+      </div>
+
+      <div class="svc-grid" id="services-grid">
+        <!-- Dynamically populated from Appwrite services collection -->
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ========== CONTACT SECTION ========== -->
+  <section class="contact-section-wrapper" id="contact" style="padding: 100px 0; border-top: 1px solid var(--border); background-color: var(--bg-primary);">
+    <div class="container contact-custom-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap: 64px; align-items: stretch;">
+      
+      <!-- Left Column: Info & Map Stacked -->
+      <div class="contact-info-col" style="display: flex; flex-direction: column; gap: 24px; justify-content: flex-start;">
+        <div class="contact-info" style="text-align: left; display: flex; flex-direction: column;">
+          <span style="font-size: 14px; font-weight: 600; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 8px; letter-spacing: 0.05em;">Get In Touch!</span>
+          <h2 style="font-size: 38px; font-weight: 800; line-height: 1.2; margin-bottom: 24px; font-family: var(--font-display); color: var(--text-primary); letter-spacing: -0.02em;">
+            Contact Sharaf Dent Lab
+          </h2>
+          
+          <div class="contact-methods" style="display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px;">
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 15px;">
+              <div style="color: var(--primary); display: flex; align-items: center;"><i data-lucide="phone" style="width: 18px; height: 18px;"></i></div>
+              <span id="contact-detail-phone-lbl" style="font-weight: 700;">+201091009894</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 12px; font-size: 15px;">
+              <div style="color: var(--primary); display: flex; align-items: center;"><i data-lucide="mail" style="width: 18px; height: 18px;"></i></div>
+              <span id="contact-detail-email-lbl" style="font-weight: 700;">sharafdent@gmail.com</span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 12px; font-size: 15px; line-height: 1.4;">
+              <div style="color: var(--primary); display: flex; align-items: center; margin-top: 2px;"><i data-lucide="map-pin" style="width: 18px; height: 18px;"></i></div>
+              <span id="contact-detail-address-lbl" style="font-weight: 700;">cairo, egypt</span>
+            </div>
+          </div>
+          
+          <a href="https://wa.me/201091009894" target="_blank" class="btn btn-secondary" style="align-self: flex-start; display: inline-flex; align-items: center; gap: 8px;">
+            <i data-lucide="message-square" style="width: 16px; height: 16px;"></i> CHAT ON WHATSAPP
+          </a>
+        </div>
+        
+        <!-- Map Embed -->
+        <div class="map-wrapper" style="border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-lg); border: 1px solid var(--border); aspect-ratio: 16/9; width: 100%; display: flex;">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3453.136746816049!2d31.218558776319808!3d30.06164287491375!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x145840e6c646efb9%3A0x633bb271b058d4a9!2sMedical%20Center%20Zamalek!5e0!3m2!1sen!2seg!4v1717250000000!5m2!1sen!2seg" width="100%" height="100%" style="border:0; display: block;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+      </div>
+      
+      <!-- Right Column: Premium Contact Form Card -->
+      <div class="contact-form-card">
+        <h3 style="font-size: 24px; font-weight: 800; margin-bottom: 8px; font-family: var(--font-display); color: var(--text-primary); letter-spacing: -0.01em;">
+          Send Us an Inquiry
+        </h3>
+        <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 28px;">
+          Have questions or want to request our services? Fill out this form and our team will get back to you within 24 hours.
+        </p>
+        
+        <form id="sheets-contact-form" class="sheets-contact-form">
+          <!-- Doctor / Clinic Name -->
+          <div class="form-group">
+            <label for="form-doctor-name">
+              Doctor / Clinic Name <span style="color: var(--destructive); font-weight: bold;">*</span>
+            </label>
+            <input type="text" id="form-doctor-name" required placeholder="">
+          </div>
+          
+          <!-- Phone Number -->
+          <div class="form-group">
+            <label for="form-phone">
+              Phone Number <span style="color: var(--destructive); font-weight: bold;">*</span>
+            </label>
+            <input type="tel" id="form-phone" required placeholder="">
+          </div>
+          
+          <!-- Service of Interest (Optional dropdown) -->
+          <div class="form-group">
+            <label for="form-service">
+              Service of Interest <span class="lbl-optional">(Optional)</span>
+            </label>
+            <div class="select-wrapper">
+              <select id="form-service">
+                <option value="">Select a service...</option>
+                <!-- Populate dynamically from JS -->
+              </select>
+              <div class="select-arrow">
+                <i data-lucide="chevron-down"></i>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Message / Inquiry (Optional) -->
+          <div class="form-group">
+            <label for="form-message">
+              Message / Inquiry <span class="lbl-optional">(Optional)</span>
+            </label>
+            <textarea id="form-message" placeholder=""></textarea>
+          </div>
+          
+          <!-- Submit Button -->
+          <button type="submit" id="form-submit-btn" class="btn btn-primary submit-btn">
+            <span>Send Message</span>
+          </button>
+          
+          <!-- Feedback Alert -->
+          <div id="form-feedback" class="form-feedback"></div>
+        </form>
+      </div>
+      
+    </div>
+  </section>
+
+
+  <!-- ========== FOOTER ========== -->
+  <footer style="padding: 32px 0; border-top: 1px solid var(--border); background: var(--bg-primary);">
+    <div class="container" style="display: flex; flex-direction: column; align-items: center; text-align: center; font-size: 13px; color: var(--text-muted); gap: 8px; justify-content: center;">
+      <div>
+        <span id="footer-copyright-lbl">© 2026 Sharaf Dent Lab.</span>
+      </div>
+      <div>
+        <span>Developed by <a href="https://wa.me/201103795882" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none;">Taha Ayman</a></span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- WhatsApp Float -->
+  <a href="https://wa.me/201091009894" class="whatsapp-float" id="whatsapp-float-btn" target="_blank" title="Chat on WhatsApp">
+    <i data-lucide="message-circle" style="width:28px;height:28px;"></i>
+  </a>
+
+  <script src="js/config.js"></script>
+  <script src="js/appwrite-client.js"></script>
+  <script src="js/app.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lab Control Room | Sharaf Dent Lab</title>
+  <script>
+    // Unregister all old service workers and clear cache to remove Next.js PWA leftovers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        if (registrations.length > 0) {
+          for (let registration of registrations) {
+            registration.unregister();
+          }
+          if ('caches' in window) {
+            caches.keys().then(function(keys) {
+              Promise.all(keys.map(key => caches.delete(key))).then(function() {
+                window.location.reload(true);
+              });
+            });
+          }
+        }
+      });
+    }
+  </script>
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Appwrite SDK CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0/dist/iife/sdk.min.js"></script>
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- ADMIN AUTH CARD (UNAUTHENTICATED) -->
+  <div class="admin-login-wrapper" id="admin-login-area">
+    <div class="admin-login-card">
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-bottom: 32px;">
+        <img src="pic/sharaf_logo.png" alt="Sharaf Dent Lab" style="height: 60px; width: auto; object-fit: contain; margin-bottom: 16px;">
+        <h2 style="font-size: 24px; font-weight: 900; letter-spacing: -0.02em;">Laboratory Control Room</h2>
+      </div>
+
+      <!-- Login Error Alert -->
+      <div id="login-error-alert" style="display: none; padding: 12px; background-color: rgba(239, 68, 68, 0.1); border: 1px solid var(--destructive); border-radius: var(--radius-xs); color: var(--destructive); font-size: 12px; font-weight: 700; margin-bottom: 20px; align-items: center; gap: 8px;">
+        <i data-lucide="alert-circle" style="width: 16px; height: 16px; flex-shrink: 0;"></i>
+        <span id="login-error-msg">Incorrect credentials.</span>
+      </div>
+
+      <form id="admin-login-form" onsubmit="handleAdminLogin(event)">
+        <div class="form-group">
+          <label for="login-email" class="form-label">Admin Username</label>
+          <input type="text" id="login-email" required class="form-control" placeholder="Enter username">
+        </div>
+        <div class="form-group">
+          <label for="login-password" class="form-label">Password</label>
+          <input type="password" id="login-password" required class="form-control" placeholder="••••••••">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 12px;" id="login-submit-btn">
+          Authenticate Session
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ADMIN WORKSPACE (AUTHENTICATED) -->
+  <div class="admin-layout" id="admin-workspace-area" style="display: none;">
+
+    <!-- Mobile Hamburger Toggle (hidden on desktop) -->
+    <button class="admin-mobile-toggle" id="admin-hamburger-btn" onclick="toggleAdminSidebar()" aria-label="Toggle menu">
+      <i data-lucide="menu" style="width:20px;height:20px;"></i>
+    </button>
+
+    <!-- Mobile Overlay to close sidebar on tap -->
+    <div class="admin-sidebar-overlay" id="admin-sidebar-overlay" onclick="closeAdminSidebar()"></div>
+    
+    <!-- Left Navigation Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="admin-logo">
+        <a href="index.html" class="logo-link">
+          <img src="pic/sharaf_logo.png" alt="Logo" style="height: 32px; width: auto; object-fit: contain;">
+          <span class="logo-text">Sharaf Dent Lab</span>
+        </a>
+      </div>
+      
+      <ul class="admin-menu">
+        <li><a href="#" class="admin-menu-link active" onclick="switchAdminTab('settings')"><i data-lucide="settings"></i> Texts & Info</a></li>
+        <li><a href="#" class="admin-menu-link" onclick="switchAdminTab('media')"><i data-lucide="image"></i> Main Images</a></li>
+        <li><a href="#" class="admin-menu-link" onclick="switchAdminTab('services')"><i data-lucide="layers"></i> Services</a></li>
+        <li><a href="#" class="admin-menu-link" onclick="switchAdminTab('cases')"><i data-lucide="award"></i> Image Gallery</a></li>
+        <li style="display: none;"><a href="#" class="admin-menu-link" onclick="switchAdminTab('pricelist')" style="color: #f59e0b;"><i data-lucide="badge-dollar-sign"></i> Pricelist</a></li>
+      </ul>
+      
+      <div style="margin-top: auto; padding: 0 32px;">
+        <button class="btn btn-secondary" onclick="handleAdminLogout()" style="width: 100%;">
+          <i data-lucide="log-out" style="width: 14px; height: 14px;"></i> Log Out
+        </button>
+      </div>
+    </aside>
+
+    <!-- Right Workspace Area -->
+    <main class="admin-content">
+      
+      <!-- Topbar Header -->
+      <div class="admin-topbar">
+        <h2 class="admin-title" id="current-panel-title">Overview Dashboard</h2>
+        
+        <div class="admin-user" style="display: flex; align-items: center; gap: 20px;">
+          <!-- Theme Switcher -->
+          <div class="theme-switch-wrapper">
+            <button class="theme-btn" data-theme-val="light" title="Light"><i data-lucide="sun" style="width:14px;height:14px;"></i></button>
+            <button class="theme-btn active" data-theme-val="dark" title="Dark"><i data-lucide="moon" style="width:14px;height:14px;"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Overview Stats Grid -->
+      <div id="admin-panel-overview" class="admin-tab-panel">
+        <div class="admin-stats-grid">
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon"><i data-lucide="layers"></i></div>
+            <div>
+              <div class="admin-stat-num" id="stat-services-count">0</div>
+              <div class="admin-stat-label">Restoration Specialties</div>
+            </div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon"><i data-lucide="award"></i></div>
+            <div>
+              <div class="admin-stat-num" id="stat-cases-count">0</div>
+              <div class="admin-stat-label">Portfolio Cases</div>
+            </div>
+          </div>
+          <div class="admin-stat-card">
+            <div class="admin-stat-icon"><i data-lucide="activity"></i></div>
+            <div>
+              <div class="admin-stat-num" id="stat-process-count">0</div>
+              <div class="admin-stat-label">Workflow Steps</div>
+            </div>
+          </div>
+          <div class="admin-stat-card" style="position: relative;">
+            <div class="admin-stat-icon"><i data-lucide="inbox"></i></div>
+            <div>
+              <div class="admin-stat-num" id="stat-messages-count">0</div>
+              <div class="admin-stat-label">prescriptions received</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Access Board -->
+        <div class="admin-data-card">
+          <div class="admin-card-header">
+            <h3 style="font-size: 16px;">CMS Diagnostic Room</h3>
+          </div>
+          <div style="padding: 32px; display: grid; grid-template-cols: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;">
+            
+            <div class="form-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+              <div>
+                <h4 style="font-size: 15px; margin-bottom: 8px;">Create Zirconia Specialty</h4>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">Quickly publish monolithic structures, tolerance parameters, and shades options.</p>
+              </div>
+              <button class="btn btn-primary" onclick="openCrudModal('services')">Add Specialty</button>
+            </div>
+
+            <div class="form-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+              <div>
+                <h4 style="font-size: 15px; margin-bottom: 8px;">Publish Aesthetic Case</h4>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">Quickly display aesthetic comparative smile makeovers and multi-angle scans.</p>
+              </div>
+              <button class="btn btn-primary" onclick="openCrudModal('cases')">Add Portfolio Case</button>
+            </div>
+
+            <div class="form-card" style="padding: 24px; display: flex; flex-direction: column; justify-content: space-between; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+              <div>
+                <h4 style="font-size: 15px; margin-bottom: 8px;">Case Orders Queue</h4>
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 24px;">Check prescriptions, download attachments, and launch chat coordinators.</p>
+              </div>
+              <button class="btn btn-secondary" onclick="switchAdminTab('messages')">Go to Inbox</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Settings Panel -->
+      <div id="admin-panel-settings" class="admin-tab-panel" style="display: none;">
+        <div class="admin-data-card" style="padding: 32px;">
+          <form id="admin-settings-form" onsubmit="handleSettingsUpdate(event)">
+            
+            <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;">
+              <h3 style="font-size: 16px;">1. Site Brand Identity</h3>
+            </div>
+            <div class="form-group-grid">
+              <div class="form-group">
+                <label for="set-site-name" class="form-label">Website Name</label>
+                <input type="text" id="set-site-name" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="set-footer-text" class="form-label">Footer Copyright Copy</label>
+                <input type="text" id="set-footer-text" class="form-control">
+              </div>
+            </div>
+
+            <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; margin-top: 40px;">
+              <h3 style="font-size: 16px;">2. Contact Coordination channels</h3>
+            </div>
+            <div class="form-group-grid">
+              <div class="form-group">
+                <label for="set-phone" class="form-label">Direct Telephone</label>
+                <input type="text" id="set-phone" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="set-whatsapp" class="form-label">WhatsApp Channel</label>
+                <input type="text" id="set-whatsapp" class="form-control">
+              </div>
+              <div class="form-group">
+                <label for="set-email" class="form-label">Support Desk Email</label>
+                <input type="email" id="set-email" class="form-control">
+              </div>
+              <input type="hidden" id="set-facebook">
+              <div class="form-group" class="full-width" style="grid-column: span 2;">
+                <label for="set-address" class="form-label">Lab Global Address</label>
+                <input type="text" id="set-address" class="form-control">
+              </div>
+            </div>
+
+            <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; margin-top: 40px;">
+              <h3 style="font-size: 16px;">3. Global SEO Headers</h3>
+            </div>
+            <div class="form-group">
+              <label for="set-seo-title" class="form-label">Global Page Title</label>
+              <input type="text" id="set-seo-title" class="form-control">
+            </div>
+            <div class="form-group">
+              <label for="set-seo-desc" class="form-label">Global Page Description</label>
+              <textarea id="set-seo-desc" class="form-control" rows="3"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 32px;" id="settings-save-btn">
+              <i data-lucide="save" style="width: 14px; height: 14px;"></i> Save Global brand Config
+            </button>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Media/Images Panel -->
+      <div id="admin-panel-media" class="admin-tab-panel" style="display: none;">
+        <div class="admin-data-card" style="padding: 32px;">
+          <form id="admin-media-form" onsubmit="handleMediaUpdate(event)">
+            
+            <div style="border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px;">
+              <h3 style="font-size: 16px;">Website Images Management</h3>
+            </div>
+
+            <!-- Logo Image Group -->
+            <div style="display: grid; grid-template-columns: 150px 1fr; gap: 24px; margin-bottom: 32px; align-items: start;">
+              <div style="text-align: center;">
+                <label class="form-label">Site Logo Preview</label>
+                <div style="width: 100px; height: 100px; border-radius: var(--radius-md); border: 1px solid var(--border); background-color: var(--bg-secondary); margin: 8px auto 0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <img id="logo-preview-img" src="pic/sharaf_logo.png" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                </div>
+              </div>
+              <div>
+                <input type="hidden" id="media-logo-url">
+                <div class="form-group">
+                  <label for="media-logo-file" class="form-label">Upload New File</label>
+                  <input type="file" id="media-logo-file" class="form-control" accept="image/*" onchange="uploadImageField('logo')">
+                  <span id="logo-upload-status" style="font-size: 11px; color: var(--success); display: none; margin-top: 4px;">Uploaded to storage!</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Hero Image Group -->
+            <div style="display: grid; grid-template-columns: 150px 1fr; gap: 24px; margin-bottom: 32px; align-items: start;">
+              <div style="text-align: center;">
+                <label class="form-label">Hero Image Preview</label>
+                <div style="width: 120px; height: 90px; border-radius: var(--radius-md); border: 1px solid var(--border); background-color: var(--bg-secondary); margin: 8px auto 0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <img id="hero-preview-img" src="pic/sharaf_pic.png" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+              </div>
+              <div>
+                <input type="hidden" id="media-hero-url">
+                <div class="form-group">
+                  <label for="media-hero-file" class="form-label">Upload New File</label>
+                  <input type="file" id="media-hero-file" class="form-control" accept="image/*" onchange="uploadImageField('hero')">
+                  <span id="hero-upload-status" style="font-size: 11px; color: var(--success); display: none; margin-top: 4px;">Uploaded to storage!</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- About Image Group -->
+            <div style="display: grid; grid-template-columns: 150px 1fr; gap: 24px; margin-bottom: 32px; align-items: start;">
+              <div style="text-align: center;">
+                <label class="form-label">About Image Preview</label>
+                <div style="width: 120px; height: 90px; border-radius: var(--radius-md); border: 1px solid var(--border); background-color: var(--bg-secondary); margin: 8px auto 0; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <img id="about-preview-img" src="pic/E-MAX.png" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+              </div>
+              <div>
+                <input type="hidden" id="media-about-url">
+                <div class="form-group">
+                  <label for="media-about-file" class="form-label">Upload New File</label>
+                  <input type="file" id="media-about-file" class="form-control" accept="image/*" onchange="uploadImageField('about')">
+                  <span id="about-upload-status" style="font-size: 11px; color: var(--success); display: none; margin-top: 4px;">Uploaded to storage!</span>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="margin-top: 16px;" id="media-save-btn">
+              <i data-lucide="save" style="width: 14px; height: 14px;"></i> Save Website Images
+            </button>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Why Choose Us List Card panel -->
+      <div id="admin-panel-why-us" class="admin-tab-panel" style="display: none;">
+        <div class="admin-data-card">
+          <div class="admin-card-header">
+            <h3 style="font-size: 16px;">Homepage Value Cards</h3>
+            <button class="btn btn-primary btn-sm" onclick="openCrudModal('whyUs')" style="padding: 8px 16px; font-size: 11px;">Add Card</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">Order</th>
+                <th>Card Title</th>
+                <th>Card Description</th>
+                <th style="width: 80px;">Icon</th>
+                <th style="width: 120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="why-us-table-body">
+              <!-- Dynamically loaded -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Specialties CRUD panel -->
+      <div id="admin-panel-services" class="admin-tab-panel" style="display: none;">
+        <div class="admin-data-card">
+          <div class="admin-card-header">
+            <h3 style="font-size: 16px;">Lab Specialties Index</h3>
+            <button class="btn btn-primary" onclick="openCrudModal('services')" style="padding: 8px 16px; font-size: 11px;">Add Specialty</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">Order</th>
+                <th>Service Name</th>
+                <th style="width: 100px;">Status</th>
+                <th style="width: 120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="services-table-body">
+              <!-- Dynamically loaded -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Portfolio Cases CRUD panel -->
+      <div id="admin-panel-cases" class="admin-tab-panel" style="display: none;">
+        <div class="admin-data-card">
+          <div class="admin-card-header">
+            <h3 style="font-size: 16px;">Portfolio Cases Gallery</h3>
+            <button class="btn btn-primary" onclick="openCrudModal('cases')" style="padding: 8px 16px; font-size: 11px;">Add Portfolio Case</button>
+          </div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th style="width: 60px;">Order</th>
+                <th>Case Title</th>
+                <th style="width: 100px;">Status</th>
+                <th style="width: 120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cases-table-body">
+              <!-- Dynamically loaded -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PRICELIST PANEL -->
+      <div id="admin-panel-pricelist" class="admin-tab-panel" style="display: none;">
+
+        <!-- Section 1: Access Control -->
+        <div class="admin-data-card" style="margin-bottom: 24px;">
+          <div class="admin-card-header">
+            <h3 style="font-size:15px;font-weight:700;">Access Control</h3>
+          </div>
+          <div style="padding: 28px;">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+              <div class="form-group">
+                <label class="form-label">Doctor Access Password</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="pl-password-field" class="form-control" placeholder="e.g. sharaf2025" autocomplete="off">
+                  <button class="btn btn-primary" onclick="handlePricelistPasswordSave()" style="white-space:nowrap;">
+                    <i data-lucide="save" style="width:14px;height:14px;"></i> Save
+                  </button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Shareable Link</label>
+                <div style="display:flex;gap:8px;">
+                  <input type="text" id="pl-link-field" class="form-control" value="" readonly style="font-size:12px;color:var(--text-muted);background:var(--bg-secondary);">
+                  <button class="btn btn-secondary" onclick="copyPricelistLink()" style="white-space:nowrap;">
+                    <i data-lucide="copy" style="width:14px;height:14px;"></i> Copy
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Service Pricing -->
+        <div class="admin-data-card">
+          <div class="admin-card-header">
+            <h3 style="font-size:15px;font-weight:700;">Service Pricing</h3>
+            <span style="font-size:12px;color:var(--text-muted);">Save each row individually after editing</span>
+          </div>
+          <div style="padding: 0 0 8px;">
+            <div class="table-wrapper">
+              <table class="admin-table" style="min-width:500px;">
+                <thead>
+                  <tr>
+                    <th style="width:40%;">Service Name</th>
+                    <th style="width:25%;">Price</th>
+                    <th style="width:20%;">Unit</th>
+                    <th style="width:15%;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="pricelist-services-tbody">
+                  <tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:24px;">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- END PRICELIST PANEL -->
+
+
+
+
+      <!-- Case Messages Inbox Panel Removed -->
+
+    </main>
+  </div>
+
+  <!-- CRUD MODAL POPUP FOR FORMS (Drives WhyUs, Services, Cases, Process Timeline) -->
+  <div class="modal" id="crud-modal-popup">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="crud-modal-title">Create Item</h3>
+        <button onclick="closeCrudModal()" style="font-size: 24px;">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <!-- Form holder dynamically populated with fields in JS -->
+        <form id="crud-dynamic-form" onsubmit="handleCrudFormSubmit(event)">
+          <input type="hidden" id="crud-item-id">
+          <input type="hidden" id="crud-collection-key">
+          
+          <div id="crud-form-fields-container">
+            <!-- Dynamic fields -->
+          </div>
+
+          <div style="display: none;">
+            <button type="submit" id="crud-form-hidden-submit"></button>
+          </div>
+        </form>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCrudModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="triggerCrudSubmit()">Save document</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRESCRIPTION MESSAGE VIEW OVERLAY MODAL -->
+  <div class="modal" id="msg-detail-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Digital Case Prescription Details</h3>
+        <button onclick="closeMsgModal()" style="font-size: 24px;">&times;</button>
+      </div>
+      <div class="modal-body" id="msg-modal-body">
+        <!-- Message details injected in JS -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeMsgModal()">Close Drawer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Success/Error Alert Toast Notification Banner -->
+  <div class="admin-toast" id="admin-toast-banner">
+    <i data-lucide="check-circle" id="toast-success-icon" style="width: 18px; height: 18px; color: var(--success);"></i>
+    <i data-lucide="alert-circle" id="toast-error-icon" style="width: 18px; height: 18px; color: var(--destructive); display: none;"></i>
+    <span id="toast-banner-msg">Database record modified successfully!</span>
+  </div>
+
+  <!-- Config files & Admin Logic JS -->
+  <script src="js/config.js"></script>
+  <script src="js/appwrite-client.js"></script>
+  <script src="js/admin.js"></script>
+
+  <!-- Mobile Sidebar Drawer Logic -->
+  <script>
+    function updateHamburgerIcon(isOpen) {
+      const toggleBtn = document.querySelector('.admin-mobile-toggle');
+      if (!toggleBtn) return;
+      const icon = toggleBtn.querySelector('i');
+      if (!icon) return;
+      
+      if (isOpen) {
+        icon.setAttribute('data-lucide', 'x');
+      } else {
+        icon.setAttribute('data-lucide', 'menu');
+      }
+      if (typeof lucide !== 'undefined') {
+        lucide.createIcons();
+      }
+    }
+
+    function toggleAdminSidebar() {
+      const sidebar = document.querySelector('.admin-sidebar');
+      const overlay = document.getElementById('admin-sidebar-overlay');
+      if (!sidebar || !overlay) return;
+      
+      const isOpen = sidebar.classList.toggle('open');
+      overlay.classList.toggle('active', isOpen);
+      updateHamburgerIcon(isOpen);
+    }
+
+    function closeAdminSidebar() {
+      const sidebar = document.querySelector('.admin-sidebar');
+      const overlay = document.getElementById('admin-sidebar-overlay');
+      if (!sidebar || !overlay) return;
+      
+      sidebar.classList.remove('open');
+      overlay.classList.remove('active');
+      updateHamburgerIcon(false);
+    }
+
+    // Close sidebar when a menu link is tapped on mobile
+    document.querySelectorAll('.admin-menu-link').forEach(link => {
+      link.addEventListener('click', function() {
+        if (window.innerWidth <= 768) {
+          closeAdminSidebar();
+        }
+      });
+    });
+  </script>
+
+</body>
+</html>

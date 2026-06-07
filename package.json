@@ -1,0 +1,17 @@
+{
+  "name": "sharaf-dent-lab-vanilla",
+  "version": "1.0.0",
+  "description": "Premium Vanilla HTML/CSS/JS website with Appwrite CMS for Sharaf Dent Lab",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "node-appwrite": "^26.0.0"
+  },
+  "devDependencies": {
+    "open": "^10.1.0"
+  },
+  "private": true
+}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Price List | Sharaf Dent Lab</title>
+  <meta name="robots" content="noindex, nofollow">
+  <link rel="stylesheet" href="css/pricelist.css">
+  <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.0/dist/iife/sdk.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="pl-body">
+
+  <!-- ══ AUTH SCREEN ══════════════════════════════════════ -->
+  <div id="pl-auth-screen" class="pl-auth-wrapper">
+    <div class="pl-auth-card">
+
+      <img src="pic/sharaf_logo.png" alt="Sharaf Dent Lab" class="pl-logo-img">
+      <h1 class="pl-auth-title">Sharaf Dent Lab</h1>
+      <p class="pl-auth-subtitle">Doctors Price List</p>
+
+      <div class="pl-auth-divider"></div>
+
+      <p class="pl-auth-hint">
+        <i data-lucide="lock" style="width:13px;height:13px;"></i>
+        This page is restricted to authorized doctors only
+      </p>
+
+      <div id="pl-auth-error" class="pl-auth-error" style="display:none;">
+        <i data-lucide="alert-circle" style="width:15px;height:15px;flex-shrink:0;"></i>
+        <span id="pl-auth-error-msg">Incorrect password. Please try again.</span>
+      </div>
+
+      <form id="pl-auth-form" onsubmit="handlePricelistAuth(event)">
+        <div class="pl-input-wrapper">
+          <i data-lucide="key-round" class="pl-input-icon"></i>
+          <input
+            type="password"
+            id="pl-password-input"
+            class="pl-input"
+            placeholder="Enter access password"
+            autocomplete="current-password"
+            required
+          >
+          <button type="button" class="pl-eye-btn" onclick="togglePLPassword()">
+            <i data-lucide="eye" id="pl-eye-icon" style="width:15px;height:15px;"></i>
+          </button>
+        </div>
+
+        <button type="submit" class="pl-auth-btn" id="pl-auth-submit-btn">
+          <i data-lucide="log-in" style="width:15px;height:15px;"></i>
+          Access Price List
+        </button>
+      </form>
+
+      <p class="pl-auth-footer">
+        <i data-lucide="shield-check" style="width:12px;height:12px;"></i>
+        Contact Sharaf Dent Lab to obtain access credentials
+      </p>
+
+    </div>
+  </div>
+
+  <!-- ══ MAIN PRICE LIST ══════════════════════════════════ -->
+  <div id="pl-main-screen" style="display:none;">
+
+    <header class="pl-header">
+      <div class="pl-header-inner">
+        <div class="pl-header-brand">
+          <img src="pic/sharaf_logo.png" alt="Sharaf Dent Lab" class="pl-header-logo">
+          <div>
+            <div class="pl-header-name">Sharaf Dent Lab</div>
+            <div class="pl-header-tagline">Official Price List</div>
+          </div>
+        </div>
+        <div class="pl-header-actions">
+          <button class="pl-logout-btn" onclick="plLogout()">
+            <i data-lucide="log-out" style="width:13px;height:13px;"></i>
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="pl-hero">
+      <div class="pl-hero-inner">
+        <h2 class="pl-hero-title">Services &amp; Pricing</h2>
+      </div>
+    </div>
+
+    <main class="pl-main">
+      <div class="pl-loading" id="pl-loading-state">
+        <div class="pl-spinner"></div>
+        <p style="font-size:14px;color:#64748b;">Loading price list...</p>
+      </div>
+
+      <div id="pl-services-grid" class="pl-grid" style="display:none;"></div>
+
+      <div id="pl-empty-state" class="pl-empty" style="display:none;">
+        <i data-lucide="package-open" style="width:44px;height:44px;"></i>
+        <p>No services published yet.</p>
+      </div>
+    </main>
+
+    <footer class="pl-footer">
+      <div class="pl-footer-inner">
+        <div class="pl-footer-brand">
+          <img src="pic/sharaf_logo.png" alt="Sharaf Dent Lab" style="height:28px;opacity:0.7;">
+          <span>Sharaf Dent Lab</span>
+        </div>
+        <div class="pl-footer-contacts" id="pl-footer-contacts"></div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/appwrite-client.js"></script>
+  <script src="js/pricelist.js"></script>
+
+</body>
+</html>
