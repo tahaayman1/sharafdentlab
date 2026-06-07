@@ -40,6 +40,17 @@ function _cacheClear(...keys) {
   } else {
     keys.forEach(k => delete _dataCache[k]);
   }
+  // Also bust the public site's 6-hour localStorage cache so visitors
+  // see fresh data immediately after any admin write operation.
+  _bustPublicCache();
+}
+
+// ── Public-site cache buster ──────────────────────────
+// Admin and public site share the same origin → same localStorage.
+// After any write, delete the public 6-hour cache so the next
+// visitor to index.html sees the updated content immediately.
+function _bustPublicCache() {
+  try { localStorage.removeItem("sharafdent_pub_cache_v1"); } catch (e) {}
 }
 
 // Determine if we can connect to Appwrite Cloud

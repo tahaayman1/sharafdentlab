@@ -80,6 +80,19 @@ document.addEventListener("DOMContentLoaded", () => {
   initScrollSpy();
 });
 
+// ── Cross-tab live update ─────────────────────────────
+// When admin saves changes, they call _bustPublicCache() which
+// removes "sharafdent_pub_cache_v1" from localStorage.
+// The browser fires a "storage" event in ALL OTHER tabs on the same origin.
+// This listener catches that event and reloads the page so visitors
+// instantly see the new content without clearing cookies.
+window.addEventListener("storage", (e) => {
+  if (e.key === PUBLIC_CACHE_KEY && e.newValue === null) {
+    // Cache was busted by admin — reload silently
+    window.location.reload();
+  }
+});
+
 // ----------------------------------------------------
 // 1. Theme Engine Switcher (Light / Dark)
 // ----------------------------------------------------
