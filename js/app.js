@@ -10,7 +10,7 @@
 // Admin writes always update Appwrite directly and bust
 // the public cache so the next visitor gets fresh data.
 const PUBLIC_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
-const PUBLIC_CACHE_KEY = "sharafdent_pub_cache_v1";
+const PUBLIC_CACHE_KEY = "sharafdent_pub_cache_v2";
 
 const PubCache = {
   _getStore() {

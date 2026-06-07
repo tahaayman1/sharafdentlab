@@ -376,16 +376,14 @@ async function runSeeder() {
     }
 
     // 6. Seed Why Choose Us Cards
-    console.log("🌱 Injecting 5 value pillars...");
+    console.log("🌱 Injecting 3 value pillars...");
     try {
       const listWhy = await databases.listDocuments(DATABASE_ID, COLLECTIONS.whyUs);
       if (listWhy.total === 0) {
         const whyData = [
-          { title: "Micron-Level Tolerance", description: "Utilizing five-axis industrial German milling machinery to ensure standard dental fittings under 10 microns.", icon: "Shield", order: 1, isPublished: true },
-          { title: "Elite Aesthetics Artists", description: "Our expert technicians are trained specifically in advanced multi-layered zirconia staining and ceramic layering techniques.", icon: "Sparkles", order: 2, isPublished: true },
-          { title: "Speedy Case Dispatch", description: "Standard single crown items delivered in 48 hours, fully processed through standard digital scan files.", icon: "Activity", order: 3, isPublished: true },
-          { title: "Advanced Biomaterials", description: "Exclusively using premium certified German blocks and hypoallergenic titanium structures.", icon: "Layers", order: 4, isPublished: true },
-          { title: "Total Clinical Support", description: "Direct diagnostic support, custom shading coordinates, and chairside consultation.", icon: "HelpCircle", order: 5, isPublished: true }
+          { title: "Precision & Experience", description: "Over 15 years of expertise in dental restorations, combined with international experience and a commitment to the highest quality standards.", icon: "Award", order: 1, isPublished: true },
+          { title: "Advanced Digital Dentistry", description: "Utilizing CAD/CAM workflows, photogrammetry technology, and modern digital solutions to achieve exceptional accuracy and predictable results.", icon: "Cpu", order: 2, isPublished: true },
+          { title: "Reliable Clinical Partnership", description: "Providing personalized support, customized implant solutions, and consistent communication to help dentists deliver outstanding patient outcomes.", icon: "Users", order: 3, isPublished: true }
         ];
         for (const w of whyData) {
           await databases.createDocument(DATABASE_ID, COLLECTIONS.whyUs, ID.unique(), w);
