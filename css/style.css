@@ -1195,10 +1195,16 @@ section {
 
 .form-group-grid {
   display: grid;
-  grid-template-cols: 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
   gap: 24px;
   margin-bottom: 24px;
 }
+
+/* Admin settings/media panel padded wrapper */
+.admin-panel-padded {
+  padding: 32px;
+}
+
 
 .form-group {
   display: flex;
@@ -2020,6 +2026,28 @@ input:checked + .switch-indicator::before {
   .admin-stats-grid {
     grid-template-columns: 1fr;
   }
+
+  /* Admin panel padding reduction on mobile */
+  .admin-panel-padded {
+    padding: 16px;
+  }
+
+  /* Admin media image-upload rows: stack preview + upload on mobile */
+  [style*="grid-template-columns: 150px 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Pricelist access control grid: stack on mobile */
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Topbar fix on mobile */
+  .admin-topbar {
+    padding: 12px 0;
+    margin-bottom: 20px;
+  }
+
 }
 
 /* Custom Contact Us Side-by-Side Grid */
