@@ -2012,7 +2012,7 @@ input:checked + .switch-indicator::before {
   }
   
   .form-group-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
   
   .form-group.full-width {
@@ -2275,7 +2275,7 @@ input:checked + .switch-indicator::before {
 
   /* Forms inside admin */
   .form-group-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .admin-upload-grid {
