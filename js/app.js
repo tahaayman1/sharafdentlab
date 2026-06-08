@@ -27,11 +27,18 @@ const PubCache = {
 function getServiceTitleForCategory(cat, services = []) {
   if (!cat) return "";
   const cleanCat = cat.toLowerCase().replace(/[^a-z0-9]/g, "");
+  if (!cleanCat) return cat;
+
   const match = services.find(s => {
     const cleanSlug = (s.slug || "").toLowerCase().replace(/[^a-z0-9]/g, "");
     const cleanTitle = (s.title || "").toLowerCase().replace(/[^a-z0-9]/g, "");
-    return cleanSlug.includes(cleanCat) || cleanCat.includes(cleanSlug) ||
-           cleanTitle.includes(cleanCat) || cleanCat.includes(cleanTitle);
+    
+    if (cleanSlug === cleanCat || cleanTitle === cleanCat) return true;
+    
+    if (cleanSlug.length > 2 && (cleanSlug.includes(cleanCat) || cleanCat.includes(cleanSlug))) return true;
+    if (cleanTitle.length > 2 && (cleanTitle.includes(cleanCat) || cleanCat.includes(cleanTitle))) return true;
+    
+    return false;
   });
   if (match) return match.title;
   return null;
