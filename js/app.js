@@ -24,6 +24,20 @@ const PubCache = {
   }
 };
 
+function formatCategoryName(cat) {
+  if (!cat) return "";
+  const mapping = {
+    "zirconia": "Fixed Zirconia Restorations",
+    "Zirconia": "Fixed Zirconia Restorations",
+    "emax": "e max",
+    "E.max": "e max",
+    "emax-overlays": "e max",
+    "all-on-x": "All-on-X",
+    "All-on-X": "All-on-X"
+  };
+  return mapping[cat] || cat;
+}
+
 // Cached wrappers for public reads (no-op writes still go directly to Appwrite)
 async function pubGetSettings() {
   const c = PubCache.get("settings");
@@ -208,7 +222,7 @@ async function loadLandingPage() {
         const btn = document.createElement("button");
         btn.className = "gallery-filter-btn";
         btn.dataset.filter = cat;
-        btn.textContent = cat;
+        btn.textContent = formatCategoryName(cat);
         filterBar.appendChild(btn);
       });
 
@@ -238,7 +252,7 @@ async function loadLandingPage() {
           card.innerHTML = `
             <img src="${imgSrc}" alt="${c.title}" loading="lazy">
             <div class="gallery-card-overlay">
-              ${c.category ? `<span class="gallery-card-category">${c.category}</span>` : ""}
+              ${c.category ? `<span class="gallery-card-category">${formatCategoryName(c.category)}</span>` : ""}
               <p class="gallery-card-title">${c.title}</p>
             </div>`;
           card.addEventListener("click", () => openGalleryLightbox(idx));
@@ -342,7 +356,7 @@ function openGalleryLightbox(idx) {
   // Lightbox — high quality but capped at 1200px wide (saves ~70% vs original)
   img.src = AppServices.getFileView(c.mainImageId, 1200, 82);
   img.alt = c.title;
-  if (catEl) catEl.textContent = c.category || "";
+  if (catEl) catEl.textContent = formatCategoryName(c.category);
   if (titleEl) titleEl.textContent = c.title;
 
   lb.classList.add("active");
@@ -566,7 +580,7 @@ function renderPortfolioGrid(list) {
       <div class="case-card">
         <div class="case-img-wrapper">
           <img src="${imgUrl}" alt="${c.title}">
-          <span class="case-category-badge">${c.category}</span>
+          <span class="case-category-badge">${formatCategoryName(c.category)}</span>
         </div>
         <div class="case-card-body">
           <h3>${c.title}</h3>
@@ -621,14 +635,14 @@ async function loadCaseDetailPage() {
     const shortDescLbl = document.getElementById("case-detail-short-desc");
     const fullDescLbl = document.getElementById("case-detail-full-desc");
     
-    if (catLbl) catLbl.innerText = `${matching.category} Restorative Case study`;
+    if (catLbl) catLbl.innerText = `${formatCategoryName(matching.category)} Restorative Case study`;
     if (titleLbl) titleLbl.innerText = matching.title;
     if (shortDescLbl) shortDescLbl.innerText = matching.shortDescription;
     if (fullDescLbl) fullDescLbl.innerHTML = matching.fullDescription.replace(/\n/g, "<br>");
     
     // Set spec sheet focus label
     const focusLbl = document.getElementById("case-spec-focus");
-    if (focusLbl) focusLbl.innerText = matching.category;
+    if (focusLbl) focusLbl.innerText = formatCategoryName(matching.category);
 
     // Load double before/after compare slides
     const compWrapper = document.getElementById("case-comparative-wrapper");
