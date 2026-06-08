@@ -24,16 +24,32 @@ const PubCache = {
   }
 };
 
+function getServiceTitleForCategory(cat, services = []) {
+  if (!cat) return "";
+  const cleanCat = cat.toLowerCase().replace(/[^a-z0-9]/g, "");
+  const match = services.find(s => {
+    const cleanSlug = (s.slug || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const cleanTitle = (s.title || "").toLowerCase().replace(/[^a-z0-9]/g, "");
+    return cleanSlug.includes(cleanCat) || cleanCat.includes(cleanSlug) ||
+           cleanTitle.includes(cleanCat) || cleanCat.includes(cleanTitle);
+  });
+  if (match) return match.title;
+  return null;
+}
+
 function formatCategoryName(cat) {
   if (!cat) return "";
+  if (window._categoryMap && window._categoryMap[cat]) {
+    return window._categoryMap[cat];
+  }
   const mapping = {
     "zirconia": "Fixed Zirconia Restorations",
     "Zirconia": "Fixed Zirconia Restorations",
-    "emax": "e max",
-    "E.max": "e max",
-    "emax-overlays": "e max",
-    "all-on-x": "All-on-X",
-    "All-on-X": "All-on-X"
+    "emax": "E.max Aesthetic Overlays",
+    "E.max": "E.max Aesthetic Overlays",
+    "emax-overlays": "E.max Aesthetic Overlays",
+    "all-on-x": "All-on-X Full Arch Solutions",
+    "All-on-X": "All-on-X Full Arch Solutions"
   };
   return mapping[cat] || cat;
 }
@@ -218,6 +234,13 @@ async function loadLandingPage() {
 
       // Build unique category tabs from cases (using category field)
       const categories = [...new Set(activeCases.map(c => c.category).filter(Boolean))];
+      
+      // Build dynamic category map from live services list
+      window._categoryMap = {};
+      categories.forEach(cat => {
+        window._categoryMap[cat] = getServiceTitleForCategory(cat, services) || formatCategoryName(cat);
+      });
+
       categories.forEach(cat => {
         const btn = document.createElement("button");
         btn.className = "gallery-filter-btn";
