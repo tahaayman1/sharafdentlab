@@ -472,6 +472,8 @@ async function loadServicesPanel() {
 // ----------------------------------------------------
 async function loadCasesPanel() {
   currentCases = await AppServices.getCases();
+  currentServices = await AppServices.getServices(); // Ensure services are loaded for the dropdown
+
   const tbody = document.getElementById("cases-table-body");
   
   if (!tbody) return;

@@ -53,6 +53,8 @@ function _bustPublicCache() {
   try {
     localStorage.removeItem("sharafdent_pub_cache_v1");
     localStorage.removeItem("sharafdent_pub_cache_v2");
+    // Broadcast signal to instantly reload any open public tabs
+    localStorage.setItem("sharafdent_sync_signal", Date.now().toString());
   } catch (e) {}
 }
 

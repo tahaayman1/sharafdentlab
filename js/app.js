@@ -94,12 +94,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ── Cross-tab live update ─────────────────────────────
 // When admin saves changes, they call _bustPublicCache() which
-// removes "sharafdent_pub_cache_v2" from localStorage.
+// emits "sharafdent_sync_signal" to localStorage.
 // The browser fires a "storage" event in ALL OTHER tabs on the same origin.
 // This listener catches that event and reloads the page so visitors
 // instantly see the new content without clearing cookies.
 window.addEventListener("storage", (e) => {
-  if (e.key === PUBLIC_CACHE_KEY && e.newValue === null) {
+  if (e.key === "sharafdent_sync_signal") {
     // Cache was busted by admin — reload silently
     window.location.reload();
   }
