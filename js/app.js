@@ -9,7 +9,7 @@
 // We cache all Appwrite responses in localStorage for 6h.
 // Admin writes always update Appwrite directly and bust
 // the public cache so the next visitor gets fresh data.
-const PUBLIC_CACHE_TTL_MS = 6 * 60 * 60 * 1000; // 6 hours
+const PUBLIC_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const PUBLIC_CACHE_KEY = "sharafdent_pub_cache_v2";
 
 const PubCache = {
@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // ── Cross-tab live update ─────────────────────────────
 // When admin saves changes, they call _bustPublicCache() which
-// removes "sharafdent_pub_cache_v1" from localStorage.
+// removes "sharafdent_pub_cache_v2" from localStorage.
 // The browser fires a "storage" event in ALL OTHER tabs on the same origin.
 // This listener catches that event and reloads the page so visitors
 // instantly see the new content without clearing cookies.
@@ -249,7 +249,7 @@ async function loadLandingPage() {
         if (emptyState) emptyState.style.display = "none";
 
         filteredCases.forEach((c, idx) => {
-          const imgSrc = AppServices.getFileThumb(c.mainImageId, 800, 80);
+          const imgSrc = AppServices.getFileThumb(c.mainImageId, 600, 72);
           const card = document.createElement("div");
           card.className = "gallery-card";
           card.dataset.idx = idx;
@@ -357,7 +357,8 @@ function openGalleryLightbox(idx) {
 
   if (!lb || !img) return;
 
-  img.src = AppServices.getFileView(c.mainImageId);
+  // Lightbox — high quality but capped at 1200px wide (saves ~70% vs original)
+  img.src = AppServices.getFileView(c.mainImageId, 1200, 82);
   img.alt = c.title;
   if (catEl) catEl.textContent = c.category || "";
   if (titleEl) titleEl.textContent = c.title;
@@ -399,7 +400,7 @@ function applySiteSettings(settings) {
 
   // Update website logo
   if (settings.logoImageId) {
-    const logoSrc = AppServices.getFileView(settings.logoImageId);
+    const logoSrc = AppServices.getFileView(settings.logoImageId, 200, 85);
     if (logoSrc) {
       document.querySelectorAll(".logo-img").forEach(img => {
         img.src = logoSrc;
@@ -411,7 +412,7 @@ function applySiteSettings(settings) {
   if (settings.heroImageId) {
     const heroImg = document.getElementById("hero-img-el");
     if (heroImg) {
-      const src = AppServices.getFileView(settings.heroImageId);
+      const src = AppServices.getFileView(settings.heroImageId, 1400, 80);
       if (src) heroImg.src = src;
     }
   }
@@ -420,7 +421,7 @@ function applySiteSettings(settings) {
   if (settings.aboutImageId) {
     const aboutImg = document.getElementById("about-img-el");
     if (aboutImg) {
-      const src = AppServices.getFileView(settings.aboutImageId);
+      const src = AppServices.getFileView(settings.aboutImageId, 900, 78);
       if (src) aboutImg.src = src;
     }
   }
@@ -512,7 +513,7 @@ async function loadServiceDetailPage() {
     if (fullDescLbl) fullDescLbl.innerHTML = matching.fullDescription.replace(/\n/g, "<br>");
     
     if (mainImg) {
-      mainImg.src = matching.imageId ? AppServices.getFileView(matching.imageId) : "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=800";
+      mainImg.src = matching.imageId ? AppServices.getFileView(matching.imageId, 900, 80) : "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=800";
       mainImg.alt = matching.title;
     }
 
@@ -658,15 +659,15 @@ async function loadCaseDetailPage() {
       const beforeImg = document.getElementById("case-before-img");
       const afterImg = document.getElementById("case-after-img");
       
-      if (beforeImg) beforeImg.src = AppServices.getFileView(matching.beforeImageId);
-      if (afterImg) afterImg.src = AppServices.getFileView(matching.afterImageId);
+      if (beforeImg) beforeImg.src = AppServices.getFileView(matching.beforeImageId, 1000, 80);
+      if (afterImg) afterImg.src = AppServices.getFileView(matching.afterImageId, 1000, 80);
     } else {
       // Fallback to single main image
       if (compWrapper) compWrapper.style.display = "none";
       if (singleWrapper) singleWrapper.style.display = "block";
       
       const singleImg = document.getElementById("case-single-img");
-      if (singleImg) singleImg.src = matching.mainImageId ? AppServices.getFileView(matching.mainImageId) : "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=800";
+      if (singleImg) singleImg.src = matching.mainImageId ? AppServices.getFileView(matching.mainImageId, 1000, 80) : "https://images.unsplash.com/photo-1606811971618-4486d14f3f99?auto=format&fit=crop&q=80&w=800";
     }
 
     // Supplementary Scan collage gallery uploader list
@@ -679,7 +680,7 @@ async function loadCaseDetailPage() {
       
       matching.galleryImageIds.forEach(fid => {
         if (!fid) return;
-        const imgUrl = AppServices.getFileView(fid);
+        const imgUrl = AppServices.getFileView(fid, 800, 78);
         collage.innerHTML += `
           <div class="gallery-thumbnail" onclick="openLightboxImage('${imgUrl}')">
             <img src="${imgUrl}" alt="Case angle scan">

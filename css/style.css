@@ -661,6 +661,7 @@ section {
   color: rgba(255,255,255,0.65);
   max-width: 480px;
   line-height: 1.6;
+  margin: 0 auto;
 }
 
 /* Filter Bar */
