@@ -13,32 +13,14 @@ const PUBLIC_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 const PUBLIC_CACHE_KEY = "sharafdent_pub_cache_v2";
 
 const PubCache = {
-  _getStore() {
-    try { return JSON.parse(localStorage.getItem(PUBLIC_CACHE_KEY) || "{}"); }
-    catch (e) { return {}; }
-  },
-  _saveStore(store) {
-    try { localStorage.setItem(PUBLIC_CACHE_KEY, JSON.stringify(store)); } catch (e) {}
-  },
   get(key) {
-    const store = this._getStore();
-    const entry = store[key];
-    if (!entry) return null;
-    if (Date.now() - entry.ts > PUBLIC_CACHE_TTL_MS) {
-      delete store[key];
-      this._saveStore(store);
-      return null;
-    }
-    return entry.data;
+    return null; // Disabled localStorage cache to ensure instant updates on all devices
   },
   set(key, data) {
-    const store = this._getStore();
-    store[key] = { data, ts: Date.now() };
-    this._saveStore(store);
+    // No-op
   },
   bust() {
-    // Called by admin after a write — next public visitor re-fetches
-    try { localStorage.removeItem(PUBLIC_CACHE_KEY); } catch (e) {}
+    // No-op
   }
 };
 
