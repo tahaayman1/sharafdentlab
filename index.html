@@ -127,31 +127,49 @@
   </section>
 
 
-  <!-- ========== CASE GALLERY — 3-image slider ========== -->
+  <!-- ========== CASE GALLERY — Professional Filterable Grid ========== -->
   <section class="case-gallery-section" id="gallery">
     <div class="container">
-      <div class="section-heading-wrapper">
-        <h2 class="section-title">Case Gallery</h2>
-        <div class="section-divider"></div>
-      </div>
-
-      <div class="gallery-slider-wrapper">
-        <button class="gallery-arrow gallery-prev-btn" id="gallery-prev-btn" aria-label="Previous">
-          <i data-lucide="chevron-left"></i>
-        </button>
-
-        <div class="gallery-viewport">
-          <div class="gallery-track" id="gallery-track">
-            <!-- Dynamically populated from Appwrite cases collection -->
-          </div>
+      <div class="gallery-header">
+        <div>
+          <span class="section-overline">Our Work</span>
+          <h2 class="gallery-main-title">Case Gallery</h2>
+          <p class="gallery-subtitle">Browse our portfolio of precision dental restorations, filtered by specialty.</p>
         </div>
-
-        <button class="gallery-arrow gallery-next-btn" id="gallery-next-btn" aria-label="Next">
-          <i data-lucide="chevron-right"></i>
-        </button>
       </div>
 
-      <div class="gallery-dots" id="gallery-dots"></div>
+      <!-- Filter Tabs -->
+      <div class="gallery-filter-bar" id="gallery-filter-bar">
+        <button class="gallery-filter-btn active" data-filter="all">All Cases</button>
+        <!-- Dynamically populated with service categories -->
+      </div>
+
+      <!-- Gallery Grid -->
+      <div class="gallery-grid" id="gallery-grid">
+        <!-- Dynamically populated from Appwrite cases -->
+        <div class="gallery-empty-state" id="gallery-empty-state" style="display:none;">
+          <i data-lucide="image-off"></i>
+          <p>No cases in this category yet.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lightbox -->
+    <div class="gallery-lightbox" id="gallery-lightbox" onclick="closeGalleryLightbox(event)">
+      <div class="lightbox-inner">
+        <button class="lightbox-close-btn" onclick="document.getElementById('gallery-lightbox').classList.remove('active')" aria-label="Close">
+          <i data-lucide="x"></i>
+        </button>
+        <button class="lightbox-nav lightbox-prev" id="lightbox-prev" aria-label="Previous"><i data-lucide="chevron-left"></i></button>
+        <div class="lightbox-img-wrapper">
+          <img id="lightbox-main-img" src="" alt="">
+        </div>
+        <button class="lightbox-nav lightbox-next" id="lightbox-next" aria-label="Next"><i data-lucide="chevron-right"></i></button>
+        <div class="lightbox-caption">
+          <span class="lightbox-category-badge" id="lightbox-category"></span>
+          <h3 id="lightbox-title"></h3>
+        </div>
+      </div>
     </div>
   </section>
 

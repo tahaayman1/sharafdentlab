@@ -483,13 +483,16 @@ async function loadCasesPanel() {
   }
 
   currentCases.forEach(item => {
-    const isFeaturedBadge = item.isFeatured ? '<span class="badge" style="background-color: rgba(var(--primary), 0.1); color: var(--primary);">Featured</span>' : '<span style="color: var(--text-muted); font-size: 11px;">Standard</span>';
     const isPubBadge = item.isPublished ? '<span class="badge" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success);">Live</span>' : '<span class="badge" style="background-color: var(--bg-secondary); color: var(--text-muted);">Draft</span>';
+    const categoryBadge = item.category
+      ? `<span class="badge" style="background: rgba(37,99,235,0.12); color: var(--primary); border: 1px solid rgba(37,99,235,0.2);">${item.category}</span>`
+      : `<span style="color: var(--text-muted); font-size: 11px;">—</span>`;
     
     tbody.innerHTML += `
       <tr>
         <td><strong>${item.order}</strong></td>
         <td><strong>${item.title}</strong></td>
+        <td>${categoryBadge}</td>
         <td>${isPubBadge}</td>
         <td>
           <div class="table-actions">
@@ -632,26 +635,39 @@ function openCrudModal(collectionKey) {
       break;
 
     case "cases":
-      modalTitle.innerText = "Add Aesthetic Portfolio Case";
+      modalTitle.innerText = "Add Gallery Case Image";
+      // Build service list for category dropdown
+      const servicesForDropdown = (typeof currentServices !== 'undefined' && currentServices.length > 0)
+        ? currentServices.map(s => `<option value="${s.title}">${s.title}</option>`).join("")
+        : `<option value="Zirconia">Zirconia</option><option value="All-on-X">All-on-X</option><option value="E.max">E.max</option>`;
+
       fieldsContainer.innerHTML = `
         <div class="form-group-grid">
           <div class="form-group">
-            <label class="form-label">Gallery Image Title</label>
-            <input type="text" id="case-title" required class="form-control" placeholder="Anterior Veneers">
+            <label class="form-label">Image Title</label>
+            <input type="text" id="case-title" required class="form-control" placeholder="e.g. Full Arch Smile Rehabilitation">
           </div>
           <div class="form-group">
             <label class="form-label">Order Index</label>
             <input type="number" id="case-order" class="form-control" value="0">
           </div>
         </div>
-        
+
+        <div class="form-group">
+          <label class="form-label">Service Category <span style="color:var(--primary); font-size:10px; font-weight:600; margin-left:4px;">Used for gallery filter tabs</span></label>
+          <select id="case-category" class="form-control" style="appearance: auto;">
+            <option value="">— No Category —</option>
+            ${servicesForDropdown}
+          </select>
+        </div>
+
         <div class="form-group">
           <label class="form-label">Gallery Image</label>
           <div class="admin-upload-grid">
             <div class="admin-upload-box" onclick="triggerAdminUploader('case-main')">
               <input type="file" id="case-main-input" style="display: none;" accept="image/*" onchange="handleAdminFileSelected('case-main', event)">
-              <img id="case-main-preview" src="" style="display: none;">
-              <span id="case-main-lbl">Upload Case Image</span>
+              <img id="case-main-preview" src="" style="display: none; width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+              <span id="case-main-lbl">Click to Upload Case Image</span>
             </div>
           </div>
         </div>
@@ -784,7 +800,7 @@ async function handleCrudFormSubmit(event) {
       payload = {
         title: document.getElementById("case-title").value.trim(),
         slug: "",
-        category: "",
+        category: document.getElementById("case-category") ? document.getElementById("case-category").value : "",
         shortDescription: "",
         fullDescription: "",
         order: parseInt(document.getElementById("case-order").value) || 0,
@@ -873,6 +889,10 @@ async function editCrudDocument(colKey, id) {
       if (match) {
         document.getElementById("case-title").value = match.title || "";
         document.getElementById("case-order").value = match.order || 0;
+
+        // Populate category dropdown
+        const catEl = document.getElementById("case-category");
+        if (catEl && match.category) catEl.value = match.category;
 
         // Set cover thumbnail
         const setThumb = (key, fid) => {

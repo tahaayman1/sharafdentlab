@@ -211,21 +211,88 @@ async function loadLandingPage() {
       }
     }
 
-    // ── Gallery Slider ────────────────────────────────────────
-    const galleryTrack = document.getElementById("gallery-track");
-    if (galleryTrack) {
+    // ── Gallery Filterable Grid ──────────────────────────────
+    const galleryGrid = document.getElementById("gallery-grid");
+    const filterBar = document.getElementById("gallery-filter-bar");
+
+    if (galleryGrid && filterBar) {
       const activeCases = cases
         .filter(c => c.isPublished !== false && c.mainImageId)
         .sort((a, b) => (a.order || 0) - (b.order || 0));
-      if (activeCases.length > 0) {
-        galleryTrack.innerHTML = activeCases.map(c => {
-          const imgSrc = AppServices.getFileThumb(c.mainImageId, 700, 78);
-          return `<div class="gallery-item"><img src="${imgSrc}" alt="${c.title}" loading="lazy"></div>`;
-        }).join("");
-      }
-    }
 
-    initGallerySlider();
+      // Build unique category tabs from cases (using category field)
+      const categories = [...new Set(activeCases.map(c => c.category).filter(Boolean))];
+      categories.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "gallery-filter-btn";
+        btn.dataset.filter = cat;
+        btn.textContent = cat;
+        filterBar.appendChild(btn);
+      });
+
+      // Store cases globally for lightbox navigation
+      window._galleryCases = activeCases;
+      window._galleryFilteredCases = activeCases;
+      window._lightboxIdx = 0;
+
+      // Render gallery cards
+      function renderGallery(filteredCases) {
+        window._galleryFilteredCases = filteredCases;
+        galleryGrid.innerHTML = "";
+        const emptyState = document.getElementById("gallery-empty-state");
+
+        if (filteredCases.length === 0) {
+          if (emptyState) { emptyState.style.display = ""; galleryGrid.appendChild(emptyState); }
+          lucide.createIcons();
+          return;
+        }
+        if (emptyState) emptyState.style.display = "none";
+
+        filteredCases.forEach((c, idx) => {
+          const imgSrc = AppServices.getFileThumb(c.mainImageId, 800, 80);
+          const card = document.createElement("div");
+          card.className = "gallery-card";
+          card.dataset.idx = idx;
+          card.innerHTML = `
+            <img src="${imgSrc}" alt="${c.title}" loading="lazy">
+            <div class="gallery-card-overlay">
+              ${c.category ? `<span class="gallery-card-category">${c.category}</span>` : ""}
+              <p class="gallery-card-title">${c.title}</p>
+            </div>`;
+          card.addEventListener("click", () => openGalleryLightbox(idx));
+          galleryGrid.appendChild(card);
+        });
+        lucide.createIcons();
+      }
+
+      renderGallery(activeCases);
+
+      // Filter tab click handlers
+      filterBar.querySelectorAll(".gallery-filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          filterBar.querySelectorAll(".gallery-filter-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const filter = btn.dataset.filter;
+          const filtered = filter === "all" ? activeCases : activeCases.filter(c => c.category === filter);
+          renderGallery(filtered);
+        });
+      });
+
+      // Lightbox nav buttons
+      const lbPrev = document.getElementById("lightbox-prev");
+      const lbNext = document.getElementById("lightbox-next");
+      if (lbPrev) lbPrev.addEventListener("click", (e) => { e.stopPropagation(); openGalleryLightbox(window._lightboxIdx - 1); });
+      if (lbNext) lbNext.addEventListener("click", (e) => { e.stopPropagation(); openGalleryLightbox(window._lightboxIdx + 1); });
+
+      // Keyboard navigation
+      document.addEventListener("keydown", (e) => {
+        const lb = document.getElementById("gallery-lightbox");
+        if (!lb || !lb.classList.contains("active")) return;
+        if (e.key === "ArrowLeft") openGalleryLightbox(window._lightboxIdx - 1);
+        if (e.key === "ArrowRight") openGalleryLightbox(window._lightboxIdx + 1);
+        if (e.key === "Escape") lb.classList.remove("active");
+      });
+    }
 
     // ── Coordination Contacts (Case Transmission Station) ──────────────────
     const phoneLbl = document.getElementById("contact-detail-phone-lbl");
@@ -271,61 +338,38 @@ async function loadLandingPage() {
   }
 }
 
-// ── Gallery Slider (shows 3 images, slides 1 at a time) ──────────
-function initGallerySlider() {
-  const track = document.getElementById("gallery-track");
-  const dotsEl = document.getElementById("gallery-dots");
-  const prevBtn = document.getElementById("gallery-prev-btn");
-  const nextBtn = document.getElementById("gallery-next-btn");
-  if (!track) return;
 
-  const items = track.querySelectorAll(".gallery-item");
-  galleryTotal = items.length;
-  if (galleryTotal === 0) return;
+// ── Gallery Lightbox ──────────────────────────────────────────
+function openGalleryLightbox(idx) {
+  const cases = window._galleryFilteredCases || [];
+  if (!cases.length) return;
 
-  const visibleCount = 1;
-  const maxIdx = Math.max(0, galleryTotal - visibleCount);
+  // Clamp index (wrap around)
+  if (idx < 0) idx = cases.length - 1;
+  if (idx >= cases.length) idx = 0;
+  window._lightboxIdx = idx;
 
-  // Build dots
-  if (dotsEl) {
-    dotsEl.innerHTML = "";
-    for (let i = 0; i <= maxIdx; i++) {
-      const dot = document.createElement("button");
-      dot.className = "gallery-dot" + (i === 0 ? " active" : "");
-      dot.addEventListener("click", () => { galleryGoTo(i, maxIdx); });
-      dotsEl.appendChild(dot);
-    }
+  const c = cases[idx];
+  const lb = document.getElementById("gallery-lightbox");
+  const img = document.getElementById("lightbox-main-img");
+  const catEl = document.getElementById("lightbox-category");
+  const titleEl = document.getElementById("lightbox-title");
+
+  if (!lb || !img) return;
+
+  img.src = AppServices.getFileView(c.mainImageId);
+  img.alt = c.title;
+  if (catEl) catEl.textContent = c.category || "";
+  if (titleEl) titleEl.textContent = c.title;
+
+  lb.classList.add("active");
+}
+
+function closeGalleryLightbox(e) {
+  // Only close if clicking on backdrop (not inner content)
+  if (e.target === document.getElementById("gallery-lightbox")) {
+    document.getElementById("gallery-lightbox").classList.remove("active");
   }
-
-  if (prevBtn) prevBtn.addEventListener("click", () => { clearInterval(galleryAutoTimer); galleryGoTo(galleryIdx - 1, maxIdx); startGalleryAuto(maxIdx); });
-  if (nextBtn) nextBtn.addEventListener("click", () => { clearInterval(galleryAutoTimer); galleryGoTo(galleryIdx + 1, maxIdx); startGalleryAuto(maxIdx); });
-
-  galleryGoTo(0, maxIdx);
-  startGalleryAuto(maxIdx);
-}
-
-function galleryGoTo(idx, maxIdx) {
-  if (idx < 0) idx = maxIdx;
-  if (idx > maxIdx) idx = 0;
-  galleryIdx = idx;
-
-  const track = document.getElementById("gallery-track");
-  if (!track) return;
-
-  const items = track.querySelectorAll(".gallery-item");
-  if (items.length === 0) return;
-  const itemWidth = items[0].offsetWidth + 20; // 20 = gap
-  track.style.transform = `translateX(-${galleryIdx * itemWidth}px)`;
-
-  // Update dots
-  const dots = document.querySelectorAll(".gallery-dot");
-  dots.forEach((d, i) => d.classList.toggle("active", i === galleryIdx));
-}
-
-function startGalleryAuto(maxIdx) {
-  galleryAutoTimer = setInterval(() => {
-    galleryGoTo(galleryIdx + 1, maxIdx);
-  }, 4000);
 }
 
 // Apply settings elements across public pages
