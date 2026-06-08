@@ -672,19 +672,81 @@ const AppServices = {
   },
 
   // ── 8. Storage ──────────────────────────────────────
+  // ── Client-side Image Compression ─────────────────────────────────
+  // Compresses any image to JPEG before uploading to Appwrite.
+  // Reduces file size by up to 90% — critical for staying in free storage limits.
+  //
+  // maxW:    max output width in pixels (height auto-scales)
+  // quality: JPEG quality 0.0–1.0 (0.75 = 75% — great quality/size balance)
+  compressImage(file, maxW = 1200, quality = 0.75) {
+    return new Promise((resolve) => {
+      // If not an image or already tiny (< 150KB), skip compression
+      if (!file.type.startsWith("image/") || file.size < 150 * 1024) {
+        resolve(file);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          // Calculate output dimensions
+          let w = img.width;
+          let h = img.height;
+          if (w > maxW) {
+            h = Math.round((h * maxW) / w);
+            w = maxW;
+          }
+
+          // Draw onto canvas and export as compressed JPEG
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, w, h);
+
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) { resolve(file); return; }
+              // Create a new File object from the compressed blob
+              const compressedFile = new File(
+                [blob],
+                file.name.replace(/\.[^.]+$/, ".jpg"),
+                { type: "image/jpeg", lastModified: Date.now() }
+              );
+              const origKB = Math.round(file.size / 1024);
+              const newKB  = Math.round(compressedFile.size / 1024);
+              console.log(`🗜️ Image compressed: ${origKB}KB → ${newKB}KB (${Math.round((1 - newKB/origKB)*100)}% saved)`);
+              resolve(compressedFile);
+            },
+            "image/jpeg",
+            quality
+          );
+        };
+        img.onerror = () => resolve(file); // fallback: upload original
+        img.src = e.target.result;
+      };
+      reader.onerror = () => resolve(file);
+      reader.readAsDataURL(file);
+    });
+  },
+
   async uploadFile(file) {
+    // Compress image before uploading — saves storage and bandwidth
+    const compressedFile = await this.compressImage(file);
+
     // No caching for uploads — always hits storage
     const isCloud = await this.checkCloud();
     if (isCloud) {
       const res = await appwriteStorage.createFile(
-        APPWRITE_CONFIG.bucketId, Appwrite.ID.unique(), file
+        APPWRITE_CONFIG.bucketId, Appwrite.ID.unique(), compressedFile
       );
       return res.$id;
     } else {
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(compressedFile);
       });
     }
   },
